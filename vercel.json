@@ -3,12 +3,6 @@
   "functions": {
     "api/explain.mjs": {
       "maxDuration": 20
-    },
-    "api/page.mjs": {
-      "includeFiles": "index.html"
     }
-  },
-  "rewrites": [
-    { "source": "/", "destination": "/api/page" }
-  ]
+  }
 }
