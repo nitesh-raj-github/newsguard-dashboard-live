@@ -27,7 +27,7 @@ Give three short bullets: what this model signal means, what evidence would veri
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-20b',
         temperature: 0.2,
         max_tokens: 260,
         messages: [
