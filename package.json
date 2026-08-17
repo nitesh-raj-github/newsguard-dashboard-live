@@ -2,6 +2,7 @@
   "name": "newsguard-lab",
   "private": true,
   "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
     "local": "node local-server.cjs"
