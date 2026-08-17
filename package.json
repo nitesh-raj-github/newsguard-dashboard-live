@@ -1,0 +1,12 @@
+{
+  "name": "newsguard-lab",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

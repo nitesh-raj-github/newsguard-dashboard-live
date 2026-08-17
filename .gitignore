@@ -1,0 +1,8 @@
+.env
+.env.local
+data/kaggle-news.csv
+models/
+.venv/
+__pycache__/
+*.py[cod]
+.vercel/
