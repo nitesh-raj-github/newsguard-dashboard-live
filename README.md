@@ -8,7 +8,7 @@ Requires Node.js 18 or newer.
 
 ```sh
 export GROQ_API_KEY="your_groq_api_key"
-node server.js
+node local-server.cjs
 ```
 
 Open `http://localhost:3000`.
@@ -54,7 +54,7 @@ Start with 5,000 records on a MacBook, then increase the dataset size after conf
 
 ## Security
 
-Do not put your Groq key in `index.html` or commit `.env` files. `server.js` keeps it on the server and calls Groq through `/api/explain`.
+Do not put your Groq key in `index.html` or commit `.env` files. `local-server.cjs` keeps it on the local server and calls Groq through `/api/explain`.
 
 ## Deploy on Vercel
 
