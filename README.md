@@ -1,23 +1,54 @@
 # NewsGuard Lab
 
-Train a browser-local fake-news text classifier on your own labeled CSV, then optionally ask Groq to explain its output. The Groq API is deliberately used for explanation only; it does not replace the trained classifier or claim to fact-check the text.
+NewsGuard Lab is a fake-news analysis dashboard for academic demonstrations and experimentation. It combines a browser-local baseline classifier, an optional BERT-CNN training workflow, source-review signals, saved feedback, and Groq-powered explanations.
+
+> A model prediction is a risk signal, not a fact check. Always verify claims using original reporting and independent credible evidence.
+
+## Features
+
+- Dashboard pages for claim analysis, history, training, metrics, and settings
+- Custom `text,label` CSV training in the browser
+- Risk meter and highlighted sensational-language markers
+- English and Hindi language detection/signals
+- Optional source-domain profile and verification checklist
+- Browser-local history, feedback labels, filtering, and CSV export
+- BERT-CNN metrics import for baseline-vs-deep-model comparison
+- Groq explanation endpoint that does not override the local verdict
+- Dark/light theme and responsive mobile navigation
+
+## Project structure
+
+```text
+api/explain.mjs                 Vercel serverless Groq endpoint
+data/sample-news.csv            Small sample training dataset
+scripts/prepare_kaggle_dataset.py
+scripts/train_bert_cnn.py       Python BERT-CNN trainer
+dashboard-enhancements.js       Local dashboard Home-page enhancement
+index.html                      Main dashboard interface
+index.js                        Vercel-safe Node entrypoint
+local-server.cjs                Local development server
+requirements-ml.txt             Python ML dependencies
+```
 
 ## Run locally
 
-Requires Node.js 18 or newer.
+Requires Node.js 20 or newer.
 
 ```sh
-export GROQ_API_KEY="your_groq_api_key"
+cd /Users/kumar7003/Documents/ChatGPT/skyreti
+read -s "GROQ_API_KEY?Paste Groq key: "
+echo
+export GROQ_API_KEY
 node local-server.cjs
 ```
 
-Open `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000).
 
-Without `GROQ_API_KEY`, local training and prediction still work; the explanation button reports the missing configuration.
+Without `GROQ_API_KEY`, training and local predictions work normally; only the Groq explanation button is unavailable.
 
-## Dataset format
+## Train the browser baseline
 
-Upload a UTF-8 CSV with exactly these required headers:
+Upload a UTF-8 CSV containing `text` and `label` columns. Labels must be `real` or `fake`.
 
 ```csv
 text,label
@@ -25,23 +56,11 @@ text,label
 "Secret miracle cure exposed!",fake
 ```
 
-Labels must be `real` or `fake`. Start with the sample at `data/sample-news.csv`, then replace it with a balanced, manually verified dataset. The app uses an 80/20 random split for a simple held-out accuracy score. Treat this as a baseline; use separate time/source splits and review per-class precision/recall before reporting results.
+The dashboard performs a simple 80/20 local split and saves the baseline model only in the current browser. For credible reporting, use balanced, manually verified data and inspect precision, recall, and macro F1—not accuracy alone.
 
-## Prepare the supplied Kaggle dataset
+## BERT + CNN training
 
-The `emineyetm/fake-news-detection-datasets` download contains separate `Fake.csv` and `True.csv` files with `title`, `text`, `subject`, and `date` columns. Convert them into the app's `text,label` format:
-
-```sh
-python3 scripts/prepare_kaggle_dataset.py \
-  --source "/Users/kumar7003/.cache/kagglehub/datasets/emineyetm/fake-news-detection-datasets/versions/1/News _dataset" \
-  --output data/kaggle-news.csv
-```
-
-Upload `data/kaggle-news.csv` in the browser. It contains about 45,000 records, so training in the browser may take a few seconds. This file is ignored by Git because it is a generated copy of the Kaggle data.
-
-## BERT + CNN training (Mac)
-
-Use the Python BERT + CNN trainer for the deep-learning layer. In VS Code's terminal:
+Train the deep-learning model locally on a Mac:
 
 ```sh
 python3 -m venv .venv
@@ -50,34 +69,43 @@ pip install -r requirements-ml.txt
 python scripts/train_bert_cnn.py --data data/kaggle-news.csv --max-records 5000 --epochs 3
 ```
 
-Start with 5,000 records on a MacBook, then increase the dataset size after confirming memory and training time. Apple Silicon uses the MPS accelerator automatically when PyTorch supports it. The trained weights are saved to `models/bert_cnn.pt`; accuracy, macro F1, precision, and recall are saved to `models/metrics.json`.
+The trainer writes:
 
-## Security
+- `models/bert_cnn.pt` — trained weights
+- `models/metrics.json` — validation accuracy, macro F1, precision, and recall
 
-Do not put your Groq key in `index.html` or commit `.env` files. `local-server.cjs` keeps it on the local server and calls Groq through `/api/explain`.
+Import `models/metrics.json` in the dashboard Training page to compare BERT-CNN results with the browser baseline. Start with 5,000 records on a MacBook, then increase gradually.
+
+## Kaggle dataset preparation
+
+The supplied Kaggle download has separate `Fake.csv` and `True.csv` files. Convert them into the dashboard format:
+
+```sh
+python3 scripts/prepare_kaggle_dataset.py \
+  --source "/path/to/News _dataset" \
+  --output data/kaggle-news.csv
+```
+
+`data/kaggle-news.csv` is intentionally excluded from Git because it is large and generated from external data.
+
+## Groq setup
+
+Add a fresh Groq key as `GROQ_API_KEY`. Never put it in `index.html`, GitHub, or this README.
+
+The project uses `openai/gpt-oss-20b` for explanations. The previous `llama-3.3-70b-versatile` ID is deprecated on Groq.
 
 ## Deploy on Vercel
 
-The `api/explain.mjs` file is a Vercel serverless function. It securely calls Groq, while Vercel serves `index.html` as the website.
+1. Push this repository to GitHub.
+2. In Vercel, import the repository and select the Node.js/Other preset as appropriate.
+3. Under **Settings → Environment Variables**, add `GROQ_API_KEY` for Production, Preview, and Development.
+4. Deploy.
 
-1. Create a GitHub repository and push this project to it. Do **not** commit your API key or `.env` files.
-2. At [Vercel](https://vercel.com/new), import the GitHub repository. Keep the detected project settings; there is no build command or framework required.
-3. Before deploying, open **Settings → Environment Variables** and add:
+Vercel uses `index.js` as the app entrypoint and `api/explain.mjs` for Groq. Do not use `local-server.cjs` on Vercel—it is only for local development.
 
-   ```text
-   Name: GROQ_API_KEY
-   Value: your fresh Groq API key
-   Environments: Production, Preview, Development
-   ```
+## Security and privacy
 
-4. Deploy. Your public URL will look like `https://your-project.vercel.app`.
-
-Or deploy through the VS Code terminal after logging in to Vercel:
-
-```sh
-npx vercel
-npx vercel env add GROQ_API_KEY
-npx vercel --prod
-```
-
-Enter the key only when Vercel prompts for it. Never paste it into a source file or commit it to Git.
+- API keys and generated datasets are excluded by `.gitignore`.
+- History, model state, feedback, and theme preferences are stored in the browser’s local storage.
+- Groq receives the claim only when the user explicitly clicks **Ask Groq to explain**.
+- The source URL is used for a basic domain profile; it does not fetch or verify the linked article.
