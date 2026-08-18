@@ -23,6 +23,13 @@
   const analyze = document.querySelector('#analyze');
   if (!nav || !main || !analyze) return;
 
+  // Make the first scan usable immediately. Users can replace this small
+  // demonstration baseline by training with their own labelled CSV file.
+  if (!localStorage.ngModel) {
+    document.querySelector('#sample')?.click();
+    document.querySelector('#train')?.click();
+  }
+
   const analyzeButton = nav.querySelector('[data-go="analyze"]');
   analyzeButton.insertAdjacentHTML('beforebegin', '<button data-go="home">⌂ Home</button>');
   main.insertAdjacentHTML('afterbegin', `<section class="page" id="home"><div class="home-hero card"><span class="eyebrow">News intelligence workspace // v1.0</span><h1>VERIFY SIGNAL. REVEAL CONTEXT.</h1><p>A robotics-inspired control center for cautious news analysis, source review, local model training, and explainable AI support.</p><div class="actions"><button type="button" data-go="analyze">Start a scan</button><button type="button" class="alt" data-go="training">Train your model</button></div></div><div class="home-stats"><div class="home-stat"><b id="homeChecks">0</b><span>Checks saved</span></div><div class="home-stat"><b id="homeFeedback">—</b><span>Feedback quality</span></div><div class="home-stat"><b id="homeModel">Ready</b><span>Model status</span></div><div class="home-stat"><b>04</b><span>Decision layers</span></div></div><div class="grid" style="margin-top:18px"><article class="card"><span class="eyebrow">System flow</span><h3>CLAIM → SIGNAL → REVIEW</h3><div class="home-step"><b>01</b><p>Paste a claim and, when possible, its original source.</p></div><div class="home-step"><b>02</b><p>Inspect risk, confidence, language markers, and credibility signals.</p></div><div class="home-step"><b>03</b><p>Store feedback, export history, and retrain using stronger data.</p></div></article><article class="card"><span class="eyebrow">Project credits</span><h3>DEVELOPER PROFILE</h3><p><strong>Developer — Nitesh Raj</strong><br>Under Guidance of <strong>Prof. Pappu Kumar Rai</strong></p><div class="warning">NewsGuard is designed for responsible media literacy and human-led verification.</div></article></div></section>`);
