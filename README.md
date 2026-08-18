@@ -42,7 +42,7 @@ export GROQ_API_KEY
 node local-server.cjs
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open https://newsguard-dashboard-live.vercel.app/
 
 Without `GROQ_API_KEY`, training and local predictions work normally; only the Groq explanation button is unavailable.
 
